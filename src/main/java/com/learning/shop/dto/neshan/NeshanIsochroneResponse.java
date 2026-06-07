@@ -39,7 +39,7 @@ public class NeshanIsochroneResponse {
     public static class Feature {
         private String type;                // همیشه "Feature"
         private Properties properties;      // مشخصات شامل metric (distance یا time)
-        private Geometry geometry;          // هندسه ناحیه (Polygon یا MultiPolygon)
+        private Geometry geometry;          // هندسه ناحیه (Polygon یا LineString)
 
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
@@ -62,12 +62,11 @@ public class NeshanIsochroneResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Geometry {
         private String type;                          // "Polygon" یا "MultiPolygon" یا "LineString"
-        private List<List<List<List<Double>>>> coordinates; // ۴ سطح تو رفتگی برای MultiPolygon
-
+        private Object coordinates;                   // Polygon: 3 سطح, MultiPolygon: 4 سطح, LineString: 2 سطح
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
 
-        public List<List<List<List<Double>>>> getCoordinates() { return coordinates; }
-        public void setCoordinates(List<List<List<List<Double>>>> coordinates) { this.coordinates = coordinates; }
+        public Object getCoordinates() { return coordinates; }
+        public void setCoordinates(Object coordinates) { this.coordinates = coordinates; }
     }
 }

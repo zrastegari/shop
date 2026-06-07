@@ -391,6 +391,7 @@ public class Neshanroutingservice {
     private static final String BASE_URL_MAP_MATCHING = "https://api.neshan.org/v3/map-matching";
 
     public NeshanMapMatchingResponse getMapMatching(String path) {
+        // استفاده از JSON (طبق تست مستقیم API نشون، form-urlencoded پشتیبانی نمی‌شه)
         java.util.Map<String, String> body = new java.util.HashMap<>();
         body.put("path", path);
 

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
  * زمان مشخص‌شده (از حالا تا یک هفته آینده) پیشنهاد می‌دهد.
  */
 @RestController
-@RequestMapping("/api/neshan/direction")
 public class NeshanPredictiveController {
 
     private final NeshanPredictiveService predictiveService;
@@ -35,7 +34,7 @@ public class NeshanPredictiveController {
      *   &avoidTrafficZone=false
      *   &alternative=false
      */
-    @GetMapping("/predictive")
+    @GetMapping("/api/neshan/direction/predictive")
     public ResponseEntity<NeshanPredictiveResponse> getPredictiveDirection(
             @RequestParam String origin,
             @RequestParam String destination,
@@ -59,7 +58,7 @@ public class NeshanPredictiveController {
      *   &routingType=DepartAt
      *   &dateTime=2026-06-03T14:00
      */
-    @GetMapping("/predictive/simple")
+    @GetMapping("/api/neshan/direction/predictive/simple")
     public ResponseEntity<NeshanPredictiveResponse> getPredictiveDirectionSimple(
             @RequestParam String origin,
             @RequestParam String destination,
