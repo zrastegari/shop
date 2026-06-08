@@ -14,10 +14,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  * این سرویس با تحلیل داده‌های ترافیکی جمع‌آوری‌شده، بهترین مسیر را بر اساس
  * زمان حرکت از مبدأ (routingType=DepartAt) یا زمان رسیدن به مقصد (routingType=ArriveAt)
  * پیشنهاد می‌دهد. بازه زمانی معتبر: از لحظه حال تا یک هفته آینده.
- *
- * مستندات: https://platform.neshan.org/docs/api/routing-category/routing-historical/
  */
-@Service
+ @Service
 public class NeshanPredictiveService {
 
     private final RestTemplate restTemplate;

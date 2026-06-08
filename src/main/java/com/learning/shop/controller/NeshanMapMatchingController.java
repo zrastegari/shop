@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/neshan/map-matching")
+@RequestMapping("/api/neshan/mapmatching")
 public class NeshanMapMatchingController {
 
     private final Neshanroutingservice neshanroutingservice;
@@ -17,16 +17,17 @@ public class NeshanMapMatchingController {
         this.neshanroutingservice = neshanroutingservice;
     }
 
-    /**
-     * نگاشت نقطه بر نقشه (Map Matching)
-     * مجموعه نقاط GPS رو دریافت کرده و به محتمل‌ترین مسیر روی نقشه نگاشت می‌کنه
-     *
-     * نمونه درخواست:
-     * POST /api/neshan/map-matching
-     * {
-     *   "path": "35.703983747058494,51.3213872909546|35.70363307719029,51.32144361734391"
-     * }
-     */
+    @GetMapping
+    public ResponseEntity<String> getMapMatchingTest() {
+        try {
+            String testPath = "35.703983747058494,51.3213872909546|35.70363307719029,51.32144361734391";
+            NeshanMapMatchingResponse response = neshanroutingservice.getMapMatching(testPath);
+            return ResponseEntity.ok("✅ سرویس Map Matching کار می‌کند! " + response.getSnappedPoints().size() + " نقطه");
+        } catch (Exception e) {
+            return ResponseEntity.ok("❌ خطا: " + e.getMessage());
+        }
+    }
+
     @PostMapping
     public ResponseEntity<NeshanMapMatchingResponse> getMapMatching(@RequestBody Map<String, String> request) {
         String path = request.get("path");

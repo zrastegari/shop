@@ -1,175 +1,439 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تست سرویس‌های نشان</title>
+    <title>🧭 تست سرویس‌های نشان</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #f5f5f5; margin: 20px; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-top: 30px; }
-        h2:first-child { margin-top: 0; }
-        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; direction: ltr; text-align: left; font-family: 'Courier New', monospace; resize: vertical; }
-        button { background: #3498db; color: #fff; border: none; padding: 12px 30px; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 15px 0; }
-        button:hover { background: #2980b9; }
-        pre { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 5px; padding: 15px; overflow-x: auto; direction: ltr; text-align: left; font-size: 12px; max-height: 500px; overflow-y: auto; }
-        .success { color: #27ae60; }
-        .error { color: #e74c3c; }
-        .info { color: #7f8c8d; font-size: 13px; margin: 5px 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header p { font-size: 14px; opacity: 0.8; }
+        .container { max-width: 1100px; margin: auto; }
+
+        .nav-tabs {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; justify-content: center;
+            position: sticky; top: 10px; z-index: 100; padding: 10px; background: rgba(240,242,245,0.95);
+            backdrop-filter: blur(8px); border-radius: 15px;
+        }
+        .nav-tab {
+            padding: 10px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+            cursor: pointer; background: #fff; color: #555;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .nav-tab:hover { background: #e8f0fe; color: #1a73e8; transform: translateY(-2px); }
+        .nav-tab.active { background: #1a73e8; color: #fff; box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
+
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: #fff; border-radius: 15px; padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 18px; color: #1a1a2e; margin-bottom: 5px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .card .subtitle { font-size: 13px; color: #888; margin-bottom: 20px; }
+
+        .label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
+        textarea, input, select {
+            width: 100%; padding: 10px 12px; border: 2px solid #e8eaed; border-radius: 10px;
+            font-size: 13px; direction: ltr; text-align: left;
+            font-family: 'Consolas', monospace; transition: border-color 0.2s;
+            background: #fafbfc; margin-bottom: 12px;
+        }
+        textarea:focus, input:focus, select:focus {
+            outline: none; border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+        }
+
+        .row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .row > * { flex: 1; min-width: 120px; }
+
+        .btn {
+            padding: 10px 22px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: #1a73e8; color: #fff; }
+        .btn-primary:hover { background: #1557b0; }
+        .btn-success { background: #34a853; color: #fff; }
+        .btn-success:hover { background: #2d9249; }
+        .btn-warning { background: #fbbc04; color: #333; }
+        .btn-warning:hover { background: #e5ae00; }
+        .btn-outline { background: transparent; color: #555; border: 2px solid #e8eaed; }
+        .btn-outline:hover { background: #f8f9fa; }
+        .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 15px; }
+
+        hr.divider {
+            border: 0; height: 1px;
+            background: linear-gradient(to right, transparent, #e8eaed, transparent);
+            margin: 15px 0;
+        }
+
+        pre.output {
+            background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 16px;
+            overflow-x: auto; direction: ltr; text-align: left;
+            font-size: 12px; line-height: 1.7; max-height: 450px; overflow-y: auto; margin-top: 10px;
+        }
+        pre.output .ok { color: #a6e3a1; }
+        pre.output .err { color: #f38ba8; }
+        .loading {
+            display: inline-block; width: 16px; height: 16px;
+            border: 3px solid #ddd; border-top-color: #1a73e8;
+            border-radius: 50%; animation: spin 0.8s infinite;
+            vertical-align: middle; margin-left: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .badge {
+            display: inline-block; padding: 2px 10px; border-radius: 15px; font-size: 11px; font-weight: 600;
+        }
+        .badge-get { background: #e6f4ea; color: #137333; }
+        .badge-post { background: #fef7e0; color: #a05000; }
+        .sample-btn { background: #f0f4f9; color: #1a73e8; border: 1px dashed #1a73e8; }
+        .sample-btn:hover { background: #e8f0fe; }
+
+        @media (max-width: 768px) {
+            .row > * { flex: 1 1 100%; }
+            .nav-tab { flex: 1; text-align: center; font-size: 11px; padding: 8px 10px; }
+            .header h1 { font-size: 20px; }
+            .nav-tabs { position: static; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🧭 تست سرویس‌های نشان</h1>
-
-    <h2>📍 Map Matching (نگاشت نقطه بر نقشه)</h2>
-    <p class="info">نقاط GPS را با فرمت <code>lat,lng|lat,lng|...</code> وارد کنید (حداقل ۲ نقطه، حداکثر ۱۰۰۰)</p>
-    <p class="info" style="color:#e67e22;">💡 <strong>نکته:</strong> هرچه نقاط بیشتر و نزدیک‌تر به هم باشند، نتیجه دقیق‌تر است. پیشنهاد می‌شه حداقل ۵-۱۰ نقطه در امتداد یه مسیر واقعی وارد کنید.</p>
-    <textarea id="mapMatchingPath" placeholder="مثال: 35.703983747058494,51.3213872909546|35.70363307719029,51.32144361734391|35.703300,51.321500">35.703983747058494,51.3213872909546|35.70363307719029,51.32144361734391|35.703505,51.321423|35.703300,51.321500|35.703100,51.321550|35.702900,51.321600|35.702700,51.321650|35.702500,51.321700</textarea>
-    <br>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;">
-        <button onclick="testMapMatching()">🧭 تست Map Matching</button>
-        <button onclick="loadSampleRoute1()" style="background:#27ae60;">📌 مسیر نمونه ۱ (خیابان)</button>
-        <button onclick="loadSampleRoute2()" style="background:#8e44ad;">📌 مسیر نمونه ۲ (بزرگراه)</button>
+    <div class="header">
+        <h1>🧭 تست سرویس‌های نشان (Neshan API)</h1>
+        <p>۶ سرویس کامل - روی هر زبانه کلیک کنید و نتایج را به صورت زنده ببینید</p>
     </div>
-    <pre id="mapMatchingResult">منتظر درخواست...</pre>
 
-    <h2>📍 Isochrone (محدوده دسترسی)</h2>
-    <p class="info">مختصات مرکز + زمان (دقیقه) یا مسافت (کیلومتر)</p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <input id="isoLocation" placeholder="مختصات مرکز (lat,lng)" value="35.7208,51.4323" style="flex:2; padding:8px; border:1px solid #ddd; border-radius:5px; direction:ltr;">
-        <input id="isoTime" placeholder="زمان (دقیقه)" value="10" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px; direction:ltr;">
-        <input id="isoDistance" placeholder="مسافت (کیلومتر)" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px; direction:ltr;">
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="mm">🗺️ نگاشت مسیر</button>
+        <button class="nav-tab" data-tab="dir">🚗 مسیریابی</button>
+        <button class="nav-tab" data-tab="iso">⏱️ محدوده دسترسی</button>
+        <button class="nav-tab" data-tab="tsp">🔀 بهینه‌سازی مسیر</button>
+        <button class="nav-tab" data-tab="dm">📊 ماتریس مسافت</button>
+        <button class="nav-tab" data-tab="pred">🔮 پیش‌بینی</button>
     </div>
-    <br>
-    <button onclick="testIsochrone()">⏱ محدوده زمانی</button>
-    <button onclick="testIsochroneDistance()">📏 محدوده مسافتی</button>
-    <pre id="isoResult">منتظر درخواست...</pre>
 
-    <h2>📍 Direction (مسیریابی)</h2>
-    <p class="info">مسیریابی با ترافیک - مبدأ و مقصد</p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <input id="dirOrigin" placeholder="مبدأ (lat,lng)" value="35.7208,51.4323" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px; direction:ltr;">
-        <input id="dirDest" placeholder="مقصد (lat,lng)" value="35.6703,51.2984" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px; direction:ltr;">
+    <div class="section active" id="sec-mm">
+        <div class="card">
+            <h2>🗺️ نگاشت مسیر (Map Matching) <span class="badge badge-post">POST</span></h2>
+            <p class="subtitle">نگاشت نقاط GPS خام روی مسیر واقعی نقشه</p>
+            <div class="label">📍 نقاط GPS (فرمت: <code>lat,lng|lat,lng|...</code>)</div>
+            <textarea id="mmPath" rows="4">35.703983747058494,51.3213872909546|35.70363307719029,51.32144361734391|35.703505,51.321423|35.703300,51.321500|35.703100,51.321550|35.702900,51.321600|35.702700,51.321650|35.702500,51.321700</textarea>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-mm">🧭 تست نگاشت</button>
+                <button class="btn sample-btn btn-sm" id="btn-mm-s1">📌 خیابان ولیعصر</button>
+                <button class="btn sample-btn btn-sm" id="btn-mm-s2">📌 بزرگراه همت</button>
+            </div>
+            <pre class="output" id="out-mm">منتظر درخواست...</pre>
+        </div>
     </div>
-    <br>
-    <button onclick="testDirection()">🚗 مسیریابی با ترافیک</button>
-    <pre id="dirResult">منتظر درخواست...</pre>
+
+    <div class="section" id="sec-dir">
+        <div class="card">
+            <h2>🚗 مسیریابی (Direction) <span class="badge badge-get">GET</span></h2>
+            <p class="subtitle">مسیریابی با ترافیک، بدون ترافیک، الگوی ترافیک و عابر پیاده</p>
+            <div class="row">
+                <div>
+                    <div class="label">🟢 مبدأ (lat,lng)</div>
+                    <input id="dirOrg" value="35.7208,51.4323">
+                </div>
+                <div>
+                    <div class="label">🔴 مقصد (lat,lng)</div>
+                    <input id="dirDst" value="35.6703,51.2984">
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-dir-wt">🚦 با ترافیک</button>
+                <button class="btn btn-success" id="btn-dir-nt">🛣️ بدون ترافیک</button>
+                <button class="btn btn-warning" id="btn-dir-typ">📊 الگوی ترافیک</button>
+                <button class="btn btn-outline" id="btn-dir-ped">🚶 عابر پیاده</button>
+            </div>
+            <pre class="output" id="out-dir">منتظر درخواست...</pre>
+        </div>
+    </div>
+
+    <div class="section" id="sec-iso">
+        <div class="card">
+            <h2>⏱️ محدوده دسترسی (Isochrone) <span class="badge badge-get">GET</span></h2>
+            <p class="subtitle">محدوده قابل دسترسی بر اساس زمان یا مسافت</p>
+            <div class="row">
+                <div style="flex:2">
+                    <div class="label">📍 مختصات مرکز (lat,lng)</div>
+                    <input id="isoLoc" value="35.7208,51.4323">
+                </div>
+                <div>
+                    <div class="label">⏱ زمان (دقیقه)</div>
+                    <input id="isoTime" value="10">
+                </div>
+                <div>
+                    <div class="label">📏 مسافت (کیلومتر)</div>
+                    <input id="isoDist" value="5">
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-iso-t">⏱ بر اساس زمان</button>
+                <button class="btn btn-success" id="btn-iso-d">📏 بر اساس مسافت</button>
+                <button class="btn btn-warning btn-sm" id="btn-iso-ts">⏱ ساده (زمان)</button>
+                <button class="btn btn-outline btn-sm" id="btn-iso-ds">📏 ساده (مسافت)</button>
+            </div>
+            <pre class="output" id="out-iso">منتظر درخواست...</pre>
+        </div>
+    </div>
+
+    <div class="section" id="sec-tsp">
+        <div class="card">
+            <h2>🔀 بهینه‌سازی مسیر (TSP) <span class="badge badge-get">GET</span></h2>
+            <p class="subtitle">بهینه‌سازی مسیر فروشنده دوره‌گرد - بهترین ترتیب بازدید</p>
+            <div class="label">📍 ایستگاه‌ها (فرمت: <code>lat,lng,lat,lng,...</code>)</div>
+            <input id="tspPoints" value="35.7208,51.4323|35.7000,51.4000|35.6900,51.3800|35.6800,51.3500">
+            <div class="row">
+                <div>
+                    <div class="label">🚗 نوع وسیله</div>
+                    <select id="tspType">
+                        <option value="car">🚗 خودرو</option>
+                        <option value="motorcycle">🏍️ موتور</option>
+                        <option value="bicycle">🚲 دوچرخه</option>
+                        <option value="pedestrian">🚶 عابر</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="label">🔄 انتخاب خودکار مقصد</div>
+                    <select id="tspLast">
+                        <option value="true">✅ بله</option>
+                        <option value="false">❌ خیر</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-tsp">🔀 بهینه‌سازی مسیر</button>
+            </div>
+            <pre class="output" id="out-tsp">منتظر درخواست...</pre>
+        </div>
+    </div>
+
+    <div class="section" id="sec-dm">
+        <div class="card">
+            <h2>📊 ماتریس مسافت (Distance Matrix) <span class="badge badge-get">GET</span></h2>
+            <p class="subtitle">محاسبه فاصله و زمان بین چند مبدأ و چند مقصد</p>
+            <div class="label">📍 نقاط مبدأ (فرمت: <code>lat,lng|lat,lng|...</code>)</div>
+            <input id="dmOrg" value="35.7208,51.4323|35.7000,51.4000">
+            <div class="label">📍 نقاط مقصد (فرمت: <code>lat,lng|lat,lng|...</code>)</div>
+            <input id="dmDst" value="35.6900,51.3800|35.6800,51.3500">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-dm">📊 محاسبه ماتریس</button>
+            </div>
+            <pre class="output" id="out-dm">منتظر درخواست...</pre>
+        </div>
+    </div>
+
+    <div class="section" id="sec-pred">
+        <div class="card">
+            <h2>🔮 مسیریابی پیش‌بینی (Predictive) <span class="badge badge-get">GET</span></h2>
+            <p class="subtitle">مسیریابی پیش‌بینی بر اساس داده‌های تاریخی ترافیک</p>
+            <div class="row">
+                <div>
+                    <div class="label">🟢 مبدأ (lat,lng)</div>
+                    <input id="predOrg" value="35.7208,51.4323">
+                </div>
+                <div>
+                    <div class="label">🔴 مقصد (lat,lng)</div>
+                    <input id="predDst" value="35.6703,51.2984">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <div class="label">📅 تاریخ و زمان (خالی = هم‌اکنون)</div>
+                    <input id="predDt" placeholder="2026-06-06T14:00">
+                </div>
+                <div>
+                    <div class="label">🚗 نوع وسیله</div>
+                    <select id="predType">
+                        <option value="car">🚗 خودرو</option>
+                        <option value="motorcycle">🏍️ موتور</option>
+                        <option value="bicycle">🚲 دوچرخه</option>
+                        <option value="pedestrian">🚶 عابر</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-pred">🔮 پیش‌بینی کامل</button>
+                <button class="btn btn-success" id="btn-pred-s">🔮 پیش‌بینی ساده</button>
+            </div>
+            <pre class="output" id="out-pred">منتظر درخواست...</pre>
+        </div>
+    </div>
 </div>
 
 <script>
-    async function apiCall(url, options) {
+(function() {
+    // ===== apiCall =====
+    async function apiCall(url, opts) {
         try {
-            const res = await fetch(url, options);
-            const data = await res.json();
-            return { ok: res.ok, data, status: res.status };
-        } catch (e) {
+            const r = await fetch(url, opts);
+            return { ok: r.ok, data: await r.json(), status: r.status };
+        } catch(e) {
             return { ok: false, data: e.message, status: 0 };
         }
     }
 
-    function formatResult(result, elementId) {
-        const el = document.getElementById(elementId);
-        if (result.ok) {
-            el.className = 'success';
-            const data = result.data;
+    function $(id) { return document.getElementById(id); }
+    function loading(id) { $(id).innerHTML = '<span class="loading"></span> در حال بارگذاری...'; }
 
-            // نمایش پیام خالی بودن snappedPoints
-            if (data.snappedPoints && data.snappedPoints.length === 0) {
-                el.innerHTML = '❌ <strong>خطا:</strong> هیچ نقطه‌ای روی مسیر پیدا نشد. احتمالاً نقاط وارد شده روی معابر نقشه نیستند یا فاصله آن‌ها زیاد است.\n\n' +
-                    JSON.stringify(data, null, 2);
-            } else {
-                let extraInfo = '';
-                if (data.snappedPoints && data.snappedPoints.length > 0) {
-                    extraInfo = `✅ <strong>تعداد نقاط نگاشت شده:</strong> ${data.snappedPoints.length} از ${data.snappedPoints.length} نقطه\n\n`;
-                }
-                el.innerHTML = extraInfo + JSON.stringify(data, null, 2);
+    function showResult(r, id) {
+        const el = $(id);
+        if (r.ok) {
+            let extra = '';
+            if (r.data.routes && r.data.routes[0] && r.data.routes[0].legs && r.data.routes[0].legs[0]) {
+                const l = r.data.routes[0].legs[0];
+                extra = '<span class="ok">🚗 مسافت: ' + (l.distance ? l.distance.text : '-') + ' | ⏱ زمان: ' + (l.duration ? l.duration.text : '-') + '</span>\n\n';
             }
+            let json = JSON.stringify(r.data, null, 2);
+            el.innerHTML = '<span class="ok">✅ موفق (کد ' + r.status + ')</span>\n\n' + extra + json;
         } else {
-            el.className = 'error';
-            const msg = typeof result.data === 'string' ? result.data : JSON.stringify(result.data, null, 2);
-            el.innerHTML = '❌ <strong>خطا (کد ' + result.status + '):</strong>\n\n' + msg;
+            let json = typeof r.data === 'string' ? r.data : JSON.stringify(r.data, null, 2);
+            el.innerHTML = '<span class="err">❌ خطا (کد ' + r.status + ')</span>\n\n' + json;
         }
     }
 
-    async function testMapMatching() {
-        const path = document.getElementById('mapMatchingPath').value.trim();
-        if (!path) { alert('لطفاً نقاط را وارد کنید'); return; }
-        document.getElementById('mapMatchingResult').textContent = 'در حال بارگذاری...';
-        const result = await apiCall('/api/neshan/map-matching', {
+    // ===== Tab Navigation with data-tab attribute =====
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + this.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ===== 1. Map Matching =====
+    $('btn-mm').addEventListener('click', async function() {
+        loading('out-mm');
+        showResult(await apiCall('/api/neshan/mapmatching', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path })
+            body: JSON.stringify({ path: $('mmPath').value })
+        }), 'out-mm');
+    });
+    $('btn-mm-s1').addEventListener('click', function() {
+        $('mmPath').value = "35.6951985,51.4110607|35.6962910,51.4118951|35.6973433,51.4125802|35.6984367,51.4131792|35.6995690,51.4137443|35.7007017,51.4142483|35.7018341,51.4147170|35.7029687,51.4151453|35.7041024,51.4155336|35.7052371,51.4158812|35.7063713,51.4161938|35.7075062,51.4164719";
+        $('btn-mm').click();
+    });
+    $('btn-mm-s2').addEventListener('click', function() {
+        $('mmPath').value = "35.7630066,51.3235130|35.7622438,51.3259452|35.7599832,51.3331983|35.7588548,51.3369427|35.7577317,51.3407406|35.7566490,51.3445111|35.7556125,51.3482517|35.7546214,51.3519373|35.7536741,51.3555707|35.7527733,51.3592005|35.7519188,51.3627846|35.7511099,51.3663233";
+        $('btn-mm').click();
+    });
+
+    // ===== 2. Direction =====
+    function dirCall(type, id) {
+        $('btn-dir-' + id).addEventListener('click', async function() {
+            loading('out-dir');
+            showResult(await apiCall('/api/neshan/direction/' + type + '?origin=' + $('dirOrg').value + '&destination=' + $('dirDst').value), 'out-dir');
         });
-        formatResult(result, 'mapMatchingResult');
     }
+    dirCall('with-traffic', 'wt');
+    dirCall('no-traffic', 'nt');
+    dirCall('typical', 'typ');
+    dirCall('pedestrian', 'ped');
 
-    function loadSampleRoute1() {
-        // مسیر نمونه - خیابان ولیعصر تهران (تقاطع جمهوری تا میدان ونک)
-        const points = [
-            "35.6951985,51.4110607",
-            "35.6962910,51.4118951",
-            "35.6973433,51.4125802",
-            "35.6984367,51.4131792",
-            "35.6995690,51.4137443",
-            "35.7007017,51.4142483",
-            "35.7018341,51.4147170",
-            "35.7029687,51.4151453",
-            "35.7041024,51.4155336",
-            "35.7052371,51.4158812",
-            "35.7063713,51.4161938",
-            "35.7075062,51.4164719"
-        ].join('|');
-        document.getElementById('mapMatchingPath').value = points;
-        testMapMatching();
-    }
+    // ===== 3. Isochrone =====
+    $('btn-iso-t').addEventListener('click', async function() {
+        loading('out-iso');
+        showResult(await apiCall('/api/neshan/isochrone/time?location=' + $('isoLoc').value + '&time=' + $('isoTime').value), 'out-iso');
+    });
+    $('btn-iso-d').addEventListener('click', async function() {
+        loading('out-iso');
+        showResult(await apiCall('/api/neshan/isochrone/distance?location=' + $('isoLoc').value + '&distance=' + $('isoDist').value), 'out-iso');
+    });
+    $('btn-iso-ts').addEventListener('click', async function() {
+        loading('out-iso');
+        showResult(await apiCall('/api/neshan/isochrone/time/simple?location=' + $('isoLoc').value + '&time=' + $('isoTime').value), 'out-iso');
+    });
+    $('btn-iso-ds').addEventListener('click', async function() {
+        loading('out-iso');
+        showResult(await apiCall('/api/neshan/isochrone/distance/simple?location=' + $('isoLoc').value + '&distance=' + $('isoDist').value), 'out-iso');
+    });
 
-    function loadSampleRoute2() {
-        // مسیر نمونه - بزرگراه همت (از سعادت‌آباد تا ستاری)
-        const points = [
-            "35.7630066,51.3235130",
-            "35.7622438,51.3259452",
-            "35.7599832,51.3331983",
-            "35.7588548,51.3369427",
-            "35.7577317,51.3407406",
-            "35.7566490,51.3445111",
-            "35.7556125,51.3482517",
-            "35.7546214,51.3519373",
-            "35.7536741,51.3555707",
-            "35.7527733,51.3592005",
-            "35.7519188,51.3627846",
-            "35.7511099,51.3663233"
-        ].join('|');
-        document.getElementById('mapMatchingPath').value = points;
-        testMapMatching();
-    }
+    // ===== 4. TSP =====
+    $('btn-tsp').addEventListener('click', async function() {
+        loading('out-tsp');
+        // تبدیل نقاط از فرمت , به | (هر جفت lat,lng)
+        let points = $('tspPoints').value.trim();
+        // اگه با کاما جدا شده (lat,lng,lat,lng) تبدیل به فرمت | (lat,lng|lat,lng)
+        if (!points.includes('|')) {
+            let coords = points.split(',');
+            let pairs = [];
+            for (let i = 0; i < coords.length; i += 2) {
+                if (i + 1 < coords.length) {
+                    pairs.push(coords[i].trim() + ',' + coords[i + 1].trim());
+                }
+            }
+            points = pairs.join('|');
+        }
+        showResult(await apiCall('/api/neshan/tsp?waypoints=' + encodeURIComponent(points) + '&roundTrip=true&sourceIsAnyPoint=true&lastIsAnyPoint=' + $('tspLast').value), 'out-tsp');
+    });
 
-    async function testIsochrone() {
-        const location = document.getElementById('isoLocation').value.trim();
-        const time = document.getElementById('isoTime').value.trim();
-        if (!location || !time) { alert('مختصات و زمان را وارد کنید'); return; }
-        document.getElementById('isoResult').textContent = 'در حال بارگذاری...';
-        const result = await apiCall(`/api/neshan/isochrone/time?location=${location}&time=${time}`);
-        formatResult(result, 'isoResult');
-    }
+    // ===== 5. Distance Matrix =====
+    $('btn-dm').addEventListener('click', async function() {
+        loading('out-dm');
+        showResult(await apiCall('/api/neshan/distance-matrix?origins=' + $('dmOrg').value + '&destinations=' + $('dmDst').value), 'out-dm');
+    });
 
-    async function testIsochroneDistance() {
-        const location = document.getElementById('isoLocation').value.trim();
-        const distance = document.getElementById('isoDistance').value.trim();
-        if (!location || !distance) { alert('مختصات و مسافت را وارد کنید'); return; }
-        document.getElementById('isoResult').textContent = 'در حال بارگذاری...';
-        const result = await apiCall(`/api/neshan/isochrone/distance?location=${location}&distance=${distance}`);
-        formatResult(result, 'isoResult');
+    // ===== 6. Predictive =====
+    function getFutureDateTime() {
+        let now = new Date();
+        now.setHours(now.getHours() + 1); // +1 ساعت برای اینکه حتماً آینده باشه
+        return now.getFullYear() + '-' +
+               String(now.getMonth()+1).padStart(2,'0') + '-' +
+               String(now.getDate()).padStart(2,'0') + 'T' +
+               String(now.getHours()).padStart(2,'0') + ':' +
+               String(now.getMinutes()).padStart(2,'0');
     }
-
-    async function testDirection() {
-        const origin = document.getElementById('dirOrigin').value.trim();
-        const dest = document.getElementById('dirDest').value.trim();
-        if (!origin || !dest) { alert('مبدأ و مقصد را وارد کنید'); return; }
-        document.getElementById('dirResult').textContent = 'در حال بارگذاری...';
-        const result = await apiCall(`/api/neshan/direction/with-traffic?origin=${origin}&destination=${dest}`);
-        formatResult(result, 'dirResult');
-    }
+    $('btn-pred').addEventListener('click', async function() {
+        loading('out-pred');
+        let dt = $('predDt').value.trim() || getFutureDateTime();
+        let url = '/api/neshan/direction/predictive?origin=' + $('predOrg').value +
+                  '&destination=' + $('predDst').value +
+                  '&routingType=DepartAt' +
+                  '&dateTime=' + dt;
+        showResult(await apiCall(url), 'out-pred');
+    });
+    $('btn-pred-s').addEventListener('click', async function() {
+        loading('out-pred');
+        let dt = $('predDt').value.trim() || getFutureDateTime();
+        let url = '/api/neshan/direction/predictive/simple?origin=' + $('predOrg').value +
+                  '&destination=' + $('predDst').value +
+                  '&routingType=DepartAt' +
+                  '&dateTime=' + dt;
+        showResult(await apiCall(url), 'out-pred');
+    });
+})();
 </script>
 </body>
 </html>

@@ -31,13 +31,25 @@ public class NeshanMapMatchingResponse {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SnappedPoint {
-        private List<Double> location;      // [latitude, longitude]
-        private int originalIndex;          // اندیس متناظر در نقاط ورودی (شروع از 0)
+        private Location location;      // آبجکت location شامل latitude و longitude
+        private int originalIndex;      // اندیس متناظر در نقاط ورودی (شروع از 0)
 
-        public List<Double> getLocation() { return location; }
-        public void setLocation(List<Double> location) { this.location = location; }
+        public Location getLocation() { return location; }
+        public void setLocation(Location location) { this.location = location; }
 
         public int getOriginalIndex() { return originalIndex; }
         public void setOriginalIndex(int originalIndex) { this.originalIndex = originalIndex; }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Location {
+        private double latitude;
+        private double longitude;
+
+        public double getLatitude() { return latitude; }
+        public void setLatitude(double latitude) { this.latitude = latitude; }
+
+        public double getLongitude() { return longitude; }
+        public void setLongitude(double longitude) { this.longitude = longitude; }
     }
 }

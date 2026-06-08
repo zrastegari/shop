@@ -24,7 +24,6 @@ public class Neshanroutingservice {
     private String apiKey;
 
     private static final String BASE_URL_TRAFFIC = "https://api.neshan.org/v4/direction";
-
     private static final String BASE_URL_NO_TRAFFIC = "https://api.neshan.org/v4/direction/no-traffic";
     private static final String BASE_URL_TYPICAL     = "https://api.neshan.org/v1/direction/typical";
     private static final String BASE_URL_TSP         = "https://api.neshan.org/v3/trip";
@@ -323,11 +322,7 @@ public class Neshanroutingservice {
     // ================================================================
     //   سرویس ۶: ماتریس فاصله (Distance Matrix)
     //   محاسبه همزمان فاصله و زمان بین چندین مبدأ و چندین مقصد
-    //   مناسب برای محاسبه هزینه حمل‌ونقل، مسیریابی ناوگان و ...
-    //   مستندات: https://platform.neshan.org/docs/api/routing-category/distance-matrix/
-    // ================================================================
-
-    /**
+      /**
      * متد خصوصی برای ارسال درخواست Distance Matrix
      *
      * @param origins      نقاط مبدأ جدا شده با |  مثال: "35.7208,51.4323|35.7000,51.3500"
@@ -391,6 +386,7 @@ public class Neshanroutingservice {
     private static final String BASE_URL_MAP_MATCHING = "https://api.neshan.org/v3/map-matching";
 
     public NeshanMapMatchingResponse getMapMatching(String path) {
+        // استفاده از JSON (طبق تست مستقیم API نشون، form-urlencoded پشتیبانی نمی‌شه)
         java.util.Map<String, String> body = new java.util.HashMap<>();
         body.put("path", path);
 
