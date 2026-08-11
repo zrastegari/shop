@@ -22,9 +22,19 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!-- اعتبارسنجی (Bean Validation) برای @Valid و @NotNull روی DTO ها -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<!-- MongoDB برای سرویس هم‌پیمایی (Carpool) - جدا از JPA/SQL Server -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -45,12 +55,19 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			     <groupId>org.springframework.boot</groupId>
+				<groupId>org.springframework.boot</groupId>
 			     <artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
+				<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- MongoDB جاسازی‌شده در حافظه برای تست‌های Repository (فقط در تست) -->
+		<dependency>
+			<groupId>de.flapdoodle.embed</groupId>
+			<artifactId>de.flapdoodle.embed.mongo.spring3x</artifactId>
+			<version>4.20.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
