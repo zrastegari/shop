@@ -111,10 +111,15 @@ public class CarpoolMatchingService {
             // === مرحله ۳: دقیق‌سازی با نشون (Distance Matrix) — فقط اگر فعال باشد ===
             Double roadDistance = null;
             if (useDistanceMatrixApi) {
+                log.debug("کاندیدا {} وارد مرحله ۳ شد: فراخوانی Distance Matrix نشون", existing.getId());
                 roadDistance = measureRoadDistanceViaNeshan(newTrip, existing);
-                if (roadDistance != null && roadDistance > maxRoadDistanceMeters) {
-                    log.debug("سفر {} رد شد: مسافت جاده‌ای {} متر از آستانه بزرگ‌تر است (مرحله ۳)",
-                            existing.getId(), roadDistance);
+                if (roadDistance == null) {
+                    log.warn("کاندیدا {} در مرحله ۳ به دلیل ناتوانی در محاسبه‌ی مسافت (خطا/پاسخ نامعتبر) match نمی‌شود", existing.getId());
+                    continue;
+                }
+                if (roadDistance > maxRoadDistanceMeters) {
+                    log.debug("کاندیدا {} در مرحله ۳ رد شد: مسافت جاده‌ای {} متر > آستانه‌ی {} متر",
+                            existing.getId(), roadDistance, maxRoadDistanceMeters);
                     continue;
                 }
             }
@@ -157,16 +162,23 @@ public class CarpoolMatchingService {
     private boolean withinHaversineRange(CarpoolTrip a, CarpoolTrip b) {
         double originDist = HaversineUtil.distanceMeters(
                 a.getOriginLat(), a.getOriginLng(), b.getOriginLat(), b.getOriginLng());
-        boolean originOk = originDist <= (a.getOriginRadiusMeters() + b.getOriginRadiusMeters());
+        double originThreshold = a.getOriginRadiusMeters() + b.getOriginRadiusMeters();
 
         double destDist = HaversineUtil.distanceMeters(
                 a.getDestLat(), a.getDestLng(), b.getDestLat(), b.getDestLng());
-        boolean destOk = destDist <= (a.getDestRadiusMeters() + b.getDestRadiusMeters());
+        double destThreshold = a.getDestRadiusMeters() + b.getDestRadiusMeters();
+
+        boolean originOk = originDist <= originThreshold;
+        boolean destOk = destDist <= destThreshold;
 
         if (!originOk || !destOk) {
-            log.debug("فاصله‌ی هوایی: مبدأ={}م, مقصد={}م — شرط شعاع برقرار نیست", originDist, destDist);
+            log.debug("فیلتر Haversine رد شد: مبدأ فاصله {}م > آستانه {}م؟ [{}]، مقصد فاصله {}م > آستانه {}م؟ [{}]",
+                    (int) originDist, (int) originThreshold, originOk,
+                    (int) destDist, (int) destThreshold, destOk);
             return false;
         }
+        log.debug("فیلتر Haversine قبول شد: مبدأ {}م ≤ {}م، مقصد {}م ≤ {}م",
+                (int) originDist, (int) originThreshold, (int) destDist, (int) destThreshold);
         return true;
     }
 
@@ -187,9 +199,11 @@ public class CarpoolMatchingService {
             String destinations = a.getDestLat() + "," + a.getDestLng() + "|"
                                 + b.getDestLat() + "," + b.getDestLng();
 
+            log.debug("فراخوانی Distance Matrix نشون: origins=[{}] destinations=[{}]", origins, destinations);
+
             NeshanDistanceMatrixResponse response = neshanRoutingService.getDistanceMatrix(origins, destinations);
             if (response == null || response.getRows() == null || response.getRows().isEmpty()) {
-                log.warn("پاسخ Distance Matrix خالی بود");
+                log.warn("پاسخ Distance Matrix خالی بود (response={})", response == null ? "null" : "rows empty");
                 return null;
             }
 
@@ -211,7 +225,7 @@ public class CarpoolMatchingService {
             }
             return maxDistance;
         } catch (Exception e) {
-            log.error("خطا در فراخوانی Distance Matrix نشون: {}", e.getMessage());
+            log.error("خطا در فراخوانی Distance Matrix نشون: {}", e.getMessage(), e);
             return null;
         }
     }
