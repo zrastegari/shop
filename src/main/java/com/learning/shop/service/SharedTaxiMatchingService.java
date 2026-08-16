@@ -208,6 +208,8 @@ public class SharedTaxiMatchingService {
 
     /**
      * ساخت یک توقف جدید برای مسافر بر اساس نوع (PICKUP یا DROPOFF).
+     * توجه: چون فیلد id در TripStop با UUID تصادفی مقداردهی اولیه می‌شود،
+     * همین‌جا (در new TripStop()) یک id تازه و یکتا به‌طور خودکار گرفته می‌شود.
      */
     private TripStop buildNewStop(WaitingPassenger passenger, TripStopType type) {
         TripStop stop = new TripStop();
@@ -220,7 +222,7 @@ public class SharedTaxiMatchingService {
         return stop;
     }
 
-        /**
+    /**
      * تابع enumeration ترتیب توقف‌ها — مدل B (insert-only).
      *
      * <p><b>تصمیم طراحی (عمدی):</b> ترتیب نسبی همه‌ی توقف‌های موجود (چه
@@ -230,6 +232,18 @@ public class SharedTaxiMatchingService {
      * {@code newPickup} همواره قبل از {@code newDropoff} می‌آید). این عمداً است تا
      * «تعهد ضمنی» مسافرهای فعلی درباره‌ی ترتیب مسیرشان به هم نریزد و فضای جستجو
      * کنترل‌شده (از مرتبه‌ی O(m^2) و نه فاکتوریلی) بماند.
+     *
+     * <p><b>نکته‌ی مهم درباره‌ی copy():</b> هر توقفِ موجود، برای هر گزینه (option)،
+     * با {@link TripStop#copy()} کپی می‌شود (نه به‌صورت رفرنسِ مستقیم استفاده می‌شود).
+     * دلیل این کار دو چیز است:
+     * <ol>
+     *   <li>چون در چند گزینه‌ی مختلف همان توقف موجود ممکن است حاضر باشد، اگر رفرنسِ
+     *       مشترک استفاده می‌شد، آپدیت {@code sequenceOrder} در یک گزینه، همان
+     *       آبجکت را در گزینه‌های دیگر هم (به‌اشتباه) تغییر می‌داد.</li>
+     *   <li>{@code copy()} شناسه‌ی ({@code id}) توقفِ موجود را حفظ می‌کند (طبق پیاده‌سازی
+     *       {@link TripStop#copy()})، در حالی‌که اگر با {@code new TripStop()} دوباره
+     *       ساخته می‌شد، id تازه و اشتباهی می‌گرفت.</li>
+     * </ol>
      *
      * <p>تعداد گزینه‌ها = C(m+2, 2) که m = تعداد توقف‌های موجود است
      * (برای m=0 → ۱، m=1 → ۳، m=2 → ۶).
@@ -248,11 +262,11 @@ public class SharedTaxiMatchingService {
         for (int i = 0; i <= m; i++) {
             for (int j = i; j <= m; j++) {
                 List<TripStop> option = new ArrayList<>();
-                for (int k = 0; k < i; k++) option.add(currentStops.get(k)); // موجودهای قبل از PICKUP
-                option.add(newPickup);
-                for (int k = i; k < j; k++) option.add(currentStops.get(k)); // موجودهای بین PICKUP و DROPOFF
-                option.add(newDropoff);
-                for (int k = j; k < m; k++) option.add(currentStops.get(k)); // موجودهای بعد از DROPOFF
+                for (int k = 0; k < i; k++) option.add(currentStops.get(k).copy()); // موجودهای قبل از PICKUP
+                option.add(newPickup.copy());
+                for (int k = i; k < j; k++) option.add(currentStops.get(k).copy()); // موجودهای بین PICKUP و DROPOFF
+                option.add(newDropoff.copy());
+                for (int k = j; k < m; k++) option.add(currentStops.get(k).copy()); // موجودهای بعد از DROPOFF
                 for (int seq = 0; seq < option.size(); seq++) {
                     option.get(seq).setSequenceOrder(seq + 1);
                 }
@@ -260,10 +274,10 @@ public class SharedTaxiMatchingService {
             }
         }
         return results;
-}
+    }
 
     // ======================================================================
-    //  مرحله ۳ — محاسبهی هزینه با Neshan / Haversine
+    //  مرحله ۳ — محاسبهی هزینه با Neشان / Haversine
     // ======================================================================
 
 

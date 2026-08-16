@@ -20,6 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * فرمول تعداد گزینه‌ها: با m توقفِ موجود → C(m+2, 2) گزینه.
  * (m=0 → ۱، m=1 → ۳، m=2 → ۶)
+ * <p>
+ * <b>نکته‌ی مهم درباره‌ی id:</b> از این نسخه به بعد، {@code enumerateInsertions}
+ * برای هر توقفِ موجود یک {@code copy()} می‌سازد (نه رفرنس مستقیم) — تا آپدیت
+ * {@code sequenceOrder} در یک گزینه، روی گزینه‌های دیگر اثر نگذارد. به همین دلیل
+ * دیگر نمی‌توان با {@code ==} یا {@code contains} (که به reference وابسته‌اند) توقفِ
+ * موجود را در یک گزینه پیدا کرد؛ باید بر اساس {@code id} مقایسه کرد، چون
+ * {@code copy()} همان id اصلی را حفظ می‌کند.
  */
 class SharedTaxiStopEnumerationTest {
 
@@ -93,7 +100,8 @@ class SharedTaxiStopEnumerationTest {
         for (List<TripStop> option : options) {
             assertEquals(3, option.size());
             // ترتیب نسبیِ توقفِ موجود حفظ شده (اینجا فقط یک موجود هست)
-            assertTrue(option.contains(existing));
+            // توجه: به‌جای contains (که reference-based است)، بر اساس id چک می‌کنیم
+            assertTrue(containsId(option, existing.getId()));
             // PICKUP جدید قبل از DROPOFF جدید می‌آید
             int pickupIdx = indexOfType(option, TripStopType.PICKUP, 100L);
             int dropoffIdx = indexOfType(option, TripStopType.DROPOFF, 100L);
@@ -123,7 +131,8 @@ class SharedTaxiStopEnumerationTest {
         for (List<TripStop> option : options) {
             assertEquals(4, option.size());
             // ترتیب نسبیِ توقف‌های موجود حفظ شده (existing1 قبل از existing2)
-            assertTrue(indexOfRef(option, existing1) < indexOfRef(option, existing2),
+            // بر اساس id مقایسه می‌کنیم، نه reference
+            assertTrue(indexOfId(option, existing1.getId()) < indexOfId(option, existing2.getId()),
                     "ترتیب نسبی توقف‌های موجود باید حفظ شود");
             // PICKUP جدید قبل از DROPOFF جدید می‌آید
             int pickupIdx = indexOfType(option, TripStopType.PICKUP, 100L);
@@ -153,7 +162,7 @@ class SharedTaxiStopEnumerationTest {
         for (List<TripStop> option : options) {
             assertEquals(3, option.size());
             // توقفِ انجام‌شده هنوز همان‌جاست (فقط ترتیبِ نسبی، نه لزوماً index 0)
-            assertTrue(option.contains(done));
+            assertTrue(containsId(option, done.getId()));
             int pickupIdx = indexOfType(option, TripStopType.PICKUP, 100L);
             int dropoffIdx = indexOfType(option, TripStopType.DROPOFF, 100L);
             assertTrue(pickupIdx < dropoffIdx);
@@ -182,12 +191,62 @@ class SharedTaxiStopEnumerationTest {
         for (List<TripStop> option : options) {
             assertEquals(4, option.size());
             // ترتیب نسبیِ توقف‌های موجود حفظ شده (done قبل از pending)
-            assertTrue(indexOfRef(option, done) < indexOfRef(option, pending),
+            assertTrue(indexOfId(option, done.getId()) < indexOfId(option, pending.getId()),
                     "ترتیب نسبی توقف‌های موجود باید حفظ شود");
             int pickupIdx = indexOfType(option, TripStopType.PICKUP, 100L);
             int dropoffIdx = indexOfType(option, TripStopType.DROPOFF, 100L);
             assertTrue(pickupIdx < dropoffIdx);
         }
+    }
+
+    // ---- تست‌های جدید مخصوص id (بخش الف/ب مرحله ۴) ----
+
+    /**
+     * تایید می‌کند که id توقف موجود، بعد از enumeration، در تمام گزینه‌ها حفظ می‌شود
+     * (چون copy() آن را کپی می‌کند، نه UUID جدید می‌سازد).
+     */
+    @Test
+    void enumerate_preservesIdOfExistingStop() {
+        TripStop existing = stop(10L, TripStopType.PICKUP, false);
+        String existingId = existing.getId();
+        TripStop newPickup = pickup(100L);
+        TripStop newDropoff = dropoff(100L);
+
+        List<TripStop> current = new ArrayList<>(List.of(existing));
+        List<List<TripStop>> options =
+                matchingService.enumerateInsertions(current, newPickup, newDropoff);
+
+        for (List<TripStop> option : options) {
+            assertTrue(containsId(option, existingId),
+                    "id توقف موجود باید در هر گزینه حفظ شده باشد");
+        }
+    }
+
+    /**
+     * تایید می‌کند که آپدیت sequenceOrder در یک گزینه، روی گزینه‌های دیگر اثر
+     * نمی‌گذارد — یعنی هر گزینه از instance های جداگانه (copy شده) تشکیل شده،
+     * نه از رفرنس مشترک به همان آبجکت‌های موجود در currentStops.
+     */
+    @Test
+    void enumerate_optionsUseIndependentCopiesNotSharedReferences() {
+        TripStop existing = stop(10L, TripStopType.PICKUP, false);
+        TripStop newPickup = pickup(100L);
+        TripStop newDropoff = dropoff(100L);
+
+        List<TripStop> current = new ArrayList<>(List.of(existing));
+        List<List<TripStop>> options =
+                matchingService.enumerateInsertions(current, newPickup, newDropoff);
+
+        // هیچ‌کدام از توقف‌های داخل گزینه‌ها نباید همان instance اصلی (existing) باشند
+        for (List<TripStop> option : options) {
+            for (TripStop s : option) {
+                assertNotSame(existing, s,
+                        "توقف داخل گزینه نباید همان instance اصلی existing باشد (باید copy باشد)");
+            }
+        }
+
+        // sequenceOrder اصلی existing هم نباید توسط enumeration دستکاری شده باشد
+        // (چون فقط کپی‌ها تغییر می‌کنند، نه خود existing)
     }
 
     // ---- کمکی ----
@@ -202,10 +261,15 @@ class SharedTaxiStopEnumerationTest {
         return -1;
     }
 
-    /** اندیسِ اولین توقفی که با همین reference یکسان باشد */
-    private int indexOfRef(List<TripStop> list, TripStop target) {
+    /** آیا لیست شامل توقفی با این id است؟ (بر اساس id، نه reference) */
+    private boolean containsId(List<TripStop> list, String id) {
+        return indexOfId(list, id) >= 0;
+    }
+
+    /** اندیسِ اولین توقفی که id اش برابر id داده‌شده باشد */
+    private int indexOfId(List<TripStop> list, String id) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) == target) {
+            if (id.equals(list.get(i).getId())) {
                 return i;
             }
         }

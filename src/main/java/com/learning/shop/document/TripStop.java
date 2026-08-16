@@ -9,6 +9,9 @@ package com.learning.shop.document;
  */
 public class TripStop {
 
+    /** شناسه‌ی یکتای این توقف (برای پیدا کردنش در endpoint تکمیل توقف) */
+    private String id = java.util.UUID.randomUUID().toString();
+
     /** شناسه مسافر مربوط به این توقف */
     private Long passengerId;
 
@@ -28,6 +31,14 @@ public class TripStop {
     private Boolean completed;
 
     // ---- getter / setter ----
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Long getPassengerId() {
         return passengerId;
@@ -80,6 +91,7 @@ public class TripStop {
     /** یک کپی عمیق (deep copy) از این توقف برمی‌گرداند — برای enumeration استفاده می‌شود */
     public TripStop copy() {
         TripStop copy = new TripStop();
+        copy.setId(this.id); // مهم: id قبلی حفظ می‌شود، UUID جدید تولید نمی‌شود
         copy.setPassengerId(this.passengerId);
         copy.setType(this.type);
         copy.setLat(this.lat);

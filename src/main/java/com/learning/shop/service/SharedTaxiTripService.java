@@ -86,8 +86,7 @@ public class SharedTaxiTripService {
         ActiveSharedTrip trip = getActiveTrip(tripId);
         boolean found = false;
         for (TripStop stop : trip.getStops()) {
-            if (stop.getSequenceOrder() != null
-                    && String.valueOf(stop.getSequenceOrder()).equals(stopId)) {
+            if (stop.getId() != null && stop.getId().equals(stopId)) {
                 stop.setCompleted(true);
                 found = true;
                 break;
